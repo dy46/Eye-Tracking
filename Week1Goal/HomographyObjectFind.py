@@ -7,17 +7,12 @@ MIN_MATCH_COUNT = 10
 
 img1 = cv2.imread('feature1.png',0)          # queryImage
 
-# videoName = list()
-# videoTime = list()
-# militime = list()
-# PoRBY = list()
-# PoRBX = list()
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 videoData = datamani.createVideoData(open('1.txt', 'r'))
 
-cap = cv2.VideoCapture('jony2.mp4')
+cap = cv2.VideoCapture('jony.mp4')
 framecount = 0.0;
 fps = 25.0
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -28,7 +23,10 @@ height = 960
 # # print height
 capSize = (width,height) # this is the size of my source video
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-success = cv2.VideoWriter('adios10.mp4',fourcc,fps,capSize)
+success = cv2.VideoWriter('adios20.mp4',fourcc,fps,capSize)
+
+idx = 0 
+tail = 10
 
 i = 0
 
@@ -39,10 +37,6 @@ while (True):
     if ret==False:
         print "Break"
         break
-    # idx = min(range(len(redtime)), key=lambda x: abs(redtime[x]-framecount))
-    # idx = idx
-    # x=float(PoRBX[idx])
-    # y=float(PoRBY[idx])
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
 
@@ -81,7 +75,7 @@ while (True):
         print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         matchesMask = None
 
-    img2, x, y = datamani.drawCircle(img2, framecount, videoData)
+    img2, x, y, idx, tail = datamani.drawCircle(img2, framecount, videoData, idx, tail)
     framecount = framecount + (1.0/25.0)*1000.0
 
     draw_params = dict(matchColor = (0,255,0), # draw matches in green color

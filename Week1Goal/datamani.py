@@ -75,18 +75,20 @@ def createVideoData(textFile):
 
 	videoData.append(points)
 
-	vid = Videodata[0]
+	vid = videoData[0]
 	# print 'Starting'
 	# for x in vid:
 	# 	print x.getTMili()
 	# print 'Ending'
 	return vid
 
-def drawCircle(frame, frameCount, videoData):
+def drawCircle(frame, frameCount, videoData, Idx, Tail):
 	# hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-	idx = binarySearch(videoData, frameCount)
-	x1, y1 = videoData[idx].getCoordinates()
-	x0, y0 = videoData[idx-11].getCoordinates()
-	x, y = int(0.9*x0+0.1*x1), int(0.9*y0+0.1*y1)
+	Alpha = 7 #delay factor
+	data = videoData[Idx:Tail]
+	idx_sub = binarySearch(data, frameCount)
+	Idx = Idx+idx_sub
+	Tail = Idx+10
+	x, y = videoData[Idx-Alpha].getCoordinates()
 	cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 20)
-	return frame, x, y
+	return frame, x, y, Idx, Tail
