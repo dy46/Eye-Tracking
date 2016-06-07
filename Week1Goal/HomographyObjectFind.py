@@ -1,61 +1,35 @@
 import math
 import numpy as np
 import cv2
+import datamani
 
 MIN_MATCH_COUNT = 10
 
-img1 = cv2.imread('/Users/chenxingyu/Desktop/PythonLearning/feature1.png',0)          # queryImage
+img1 = cv2.imread('feature1.png',0)          # queryImage
 
-Videoname = list()
-Videotime = list()
-militime = list()
-PoRBY = list()
-PoRBX = list()
+# videoName = list()
+# videoTime = list()
+# militime = list()
+# PoRBY = list()
+# PoRBX = list()
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-i = False;
-with open('1.txt', 'r') as f:
-    for line in f:
-        if i is True:
-            #content = f.readlines()
-            dataline = line.split()
-            if dataline[14]=='-':
-                continue
-            Videoname.append(dataline[3])
-            militime.append(dataline[0])
-            if dataline[14]=='Saccade':
-                PoRBY.append(dataline[20]) # MOST IMPORTANT
-                PoRBX.append(dataline[19]) # MOST IMPORTANT
-                Videotime.append(dataline[33])
-            else:
-                Videotime.append(dataline[34])
-                PoRBY.append(dataline[21]) # MOST IMPORTANT
-                PoRBX.append(dataline[20]) # MOST IMPORTANT
-        i = True
-militime2 = [float(i) for i in militime]
-militime2 = [i/1000.0 for i in militime2]
-first = Videoname[0]
-count = -1
-for string in Videoname:
-    if first != string:
-        break
-    count +=1
-cap = cv2.VideoCapture('jony.mp4')
+videoData = datamani.createVideoData(open('1.txt', 'r'))
+
+cap = cv2.VideoCapture('jony2.mp4')
 framecount = 0.0;
-redtime = militime2[:count]
-norm = redtime[0]
-redtime = [i-norm for i in redtime]
-fps = 24.0
+fps = 25.0
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-print length
+# # print length
 width  = 1428
-print width
+# # print width
 height = 960
-print height
+# # print height
 capSize = (width,height) # this is the size of my source video
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-success = cv2.VideoWriter('Week1Goal.mp4',fourcc,fps,capSize) 
+success = cv2.VideoWriter('adios10.mp4',fourcc,fps,capSize)
+
 i = 0
 
 while (True):
@@ -63,13 +37,12 @@ while (True):
     print i
     ret,img2=cap.read()
     if ret==False:
+        print "Break"
         break
-    idx = min(range(len(redtime)), key=lambda x: abs(redtime[x]-framecount))
-    idx = idx
-    x=float(PoRBX[idx])
-    y=float(PoRBY[idx])
-
-    framecount = framecount + 1.0/24.0
+    # idx = min(range(len(redtime)), key=lambda x: abs(redtime[x]-framecount))
+    # idx = idx
+    # x=float(PoRBX[idx])
+    # y=float(PoRBY[idx])
     # Initiate SIFT detector
     sift = cv2.xfeatures2d.SIFT_create()
 
@@ -102,11 +75,14 @@ while (True):
         pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
         dst = cv2.perspectiveTransform(pts,M)
         img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
-        cv2.circle(img2, (int(float(PoRBX[idx])),int(float(PoRBY[idx]))), 10, (255, 0, 0), 20)
+        # cv2.circle(img2, (int(float(PoRBX[idx])),int(float(PoRBY[idx]))), 10, (255, 0, 0), 20)
 
     else:
         print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         matchesMask = None
+
+    img2, x, y = datamani.drawCircle(img2, framecount, videoData)
+    framecount = framecount + (1.0/25.0)*1000.0
 
     draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                        singlePointColor = None,
