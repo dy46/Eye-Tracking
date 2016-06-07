@@ -75,7 +75,7 @@ def createVideoData(textFile):
 
 	videoData.append(points)
 
-	vid = Videodata[0]
+	vid = videoData[0]
 	# print 'Starting'
 	# for x in vid:
 	# 	print x.getTMili()
