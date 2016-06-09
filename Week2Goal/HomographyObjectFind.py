@@ -5,7 +5,7 @@ import DataManipulationWeek2
 
 MIN_MATCH_COUNT = 5
 
-img1 = cv2.imread('1.png',0)          # queryImage
+img1 = cv2.imread('ipuprofen.png',0)          # queryImage
 
 
 font = cv2.FONT_HERSHEY_SIMPLEX
