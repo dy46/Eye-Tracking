@@ -6,13 +6,13 @@ import datamani
 MIN_MATCH_COUNT = 10
 
 img1 = cv2.imread('1.png',0)          # queryImage
-
+img1x = cv2.imread('feature1.png', 0)
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 videoData = datamani.createVideoData(open('1.txt', 'r'))
 
-cap = cv2.VideoCapture('JonyMove.mp4')
+cap = cv2.VideoCapture('twojony.mp4')
 framecount = 0.0;
 fps = 25.0
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
