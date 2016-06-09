@@ -3,7 +3,7 @@ import numpy as np
 import cv2
 import datamani
 
-MIN_MATCH_COUNT = 10
+MIN_MATCH_COUNT = 5
 
 img1 = cv2.imread('1.png',0)          # queryImage
 
