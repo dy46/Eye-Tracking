@@ -85,12 +85,13 @@ def createVideoData(textFile):
 
 def drawCircle(frame, frameCount, videoData, Idx, Tail):
 	# hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-	Alpha = 6 - int(frameCount/((1.0/25.0)*1000.0) /  10)#delay factor
+	alpha = 10
+	delayFactor = 6 - int(frameCount/((1.0/25.0)*1000.0) /  alpha)#delay factor
 	data = videoData[Idx:Tail]
 	idx_sub = binarySearch(videoData, frameCount)
 	Idx = Idx+idx_sub
 	Tail = Idx+10
-	point = idx_sub - Alpha
+	point = idx_sub - delayFactor
 	if point > len(videoData) - 1:
 		point = len(videoData) - 1
 	x, y = videoData[point].getCoordinates()
