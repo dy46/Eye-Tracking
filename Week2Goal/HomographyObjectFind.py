@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import cv2
-import datamani
+import DataManipulationWeek2
 
 MIN_MATCH_COUNT = 5
 
@@ -10,7 +10,7 @@ img1 = cv2.imread('1.png',0)          # queryImage
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-videoData = datamani.createVideoData(open('1.txt', 'r'))
+videoData = DataManipulationWeek2.createVideoData(open('Week2.txt', 'r'))
 
 cap = cv2.VideoCapture('JonyMove.mp4')
 framecount = 0.0;
@@ -75,7 +75,7 @@ while (True):
         print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         matchesMask = None
 
-    img2, x, y, idx, tail = datamani.drawCircle(img2, framecount, videoData, idx, tail)
+    img2, x, y, idx, tail = DataManipulationWeek2.drawCircle(img2, framecount, videoData, idx, tail)
     framecount = framecount + (1.0/25.0)*1000.0
 
     draw_params = dict(matchColor = (0,255,0), # draw matches in green color
