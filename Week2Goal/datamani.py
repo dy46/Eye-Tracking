@@ -67,10 +67,16 @@ def createVideoData(textFile):
 			points = list()
 			tnot = float(dataline[0])
 		dp.setTMili(float(dataline[0])-tnot)
-		if dataline[14]=='Saccade':
-			dp.setCoordinates(float(dataline[19]), float(dataline[20]))
+		if dataline[11] == '2':
+			if dataline[16] == 'Blink' or dataline[16] == 'Saccade':
+				dp.setCoordinates(float(dataline[21]), float(dataline[22]))
+			if dataline[16]=='Visual':
+				dp.setCoordinates(float(dataline[22]), float(dataline[23]))
 		else:
-			dp.setCoordinates(float(dataline[20]), float(dataline[21]))
+			if dataline[14]=='Saccade':
+				dp.setCoordinates(float(dataline[19]), float(dataline[20]))
+			else:
+				dp.setCoordinates(float(dataline[20]), float(dataline[21]))
 		pvt = cvt
 		points.append(dp)
 
