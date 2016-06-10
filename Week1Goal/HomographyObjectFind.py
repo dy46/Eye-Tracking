@@ -1,7 +1,15 @@
 import math
 import numpy as np
 import cv2
-import datamani
+import DataManipulationWeek1
+
+'''This program uses the data manipulation methods in DataManipulationWeek1.py
+to go through the input video and overlay our own circle onto the gaze location.
+Additionally, we use feature matching algorithms (SIFT and FLANN) to detect the
+object and find the edges of that object. Using the border calculated by these
+algorithms, we can determine whether or not the subject is gazing at the object,
+which is displayed at the top of the screen.'''
+
 
 MIN_MATCH_COUNT = 10
 
@@ -10,7 +18,7 @@ img1 = cv2.imread('feature1.png',0)          # queryImage
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-videoData = datamani.createVideoData(open('1.txt', 'r'))
+videoData = DataManipulationWeek1.createVideoData(open('Week1.txt', 'r'))
 
 cap = cv2.VideoCapture('jony.mp4')
 framecount = 0.0;
@@ -23,7 +31,7 @@ height = 960
 # # print height
 capSize = (width,height) # this is the size of my source video
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-success = cv2.VideoWriter('adios20.mp4',fourcc,fps,capSize)
+success = cv2.VideoWriter('Week1Goal.mp4',fourcc,fps,capSize)
 
 idx = 0 
 tail = 10
@@ -75,7 +83,7 @@ while (True):
         print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         matchesMask = None
 
-    img2, x, y, idx, tail = datamani.drawCircle(img2, framecount, videoData, idx, tail)
+    img2, x, y, idx, tail = DataManipulationWeek1.drawCircle(img2, framecount, videoData, idx, tail)
     framecount = framecount + (1.0/25.0)*1000.0
 
     draw_params = dict(matchColor = (0,255,0), # draw matches in green color
