@@ -94,10 +94,10 @@ def drawCircle(frame, frameCount, videoData, Idx, Tail):
 	alpha = 10
 	delayFactor = 6 - int(frameCount/((1.0/25.0)*1000.0) /  alpha)#delay factor
 	data = videoData[Idx:Tail]
-	idx_sub = binarySearch(videoData, frameCount)
+	idx_sub = binarySearch(data, frameCount)
 	Idx = Idx+idx_sub
 	Tail = Idx+10
-	point = idx_sub - delayFactor
+	point = Idx - delayFactor
 	if point > len(videoData) - 1:
 		point = len(videoData) - 1
 	x, y = videoData[point].getCoordinates()
