@@ -13,20 +13,28 @@ videoData = datamani.createVideoData(open('1.txt', 'r'))
 
 cap = cv2.VideoCapture('cuttwo.mp4')
 framecount = 0.0;
-fps = 25.0
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 # # print length
-width  = 1376 + np.size(img[0], 0)
+fps = cap.get(cv2.CAP_PROP_FPS)
+print fps;  
+
+ret,temp=cap.read();
+width = np.size(temp,1) 
 # # print width
-height = 960
+height= np.size(temp,0)
 # # print height
-capSize = (width,height) # this is the size of my source video
-fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-success = cv2.VideoWriter('TwoShort.mp4',fourcc,fps,capSize)
 error=0;
 for i in range(len(img)-1):
     #print np.size(i,0)
+    width+=np.size(img[i],1)
     error+=np.size(img[i],1)
+width+=np.size(img[-1],1)
+print width
+
+capSize = (width,height) # this is the size of my source video
+fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+success = cv2.VideoWriter('TwoShort.mp4',fourcc,fps,capSize)
+
 idx = 0 
 tail = 10
 i = 0
@@ -81,8 +89,8 @@ while (True):
             print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
             matchesMask = None
         if First == True:
-            img2, x, y, idx, tail = datamani.drawCircle(img2, framecount, videoData, idx, tail)
-            framecount = framecount + (1.0/25.0)*1000.0
+            img2, x, y, idx, tail = datamani.drawCircle(img2, framecount, videoData, idx, tail, fps)
+            framecount = framecount + (1.0/fps)*1000.0
         draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                            singlePointColor = None,
                            matchesMask = matchesMask, # draw only inliers
@@ -177,6 +185,7 @@ while (True):
             flag=False;
     if flag:
         cv2.putText(img3,'Gazing at none of the object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
+    #print np.size(img3,1);
     success.write(img3)
     cv2.imshow('img',img3)
     if cv2.waitKey(25) & 0xFF==ord('q'):
