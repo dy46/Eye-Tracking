@@ -11,18 +11,18 @@ font = cv2.FONT_HERSHEY_SIMPLEX
 
 videoData = datamani.createVideoData(open('1.txt', 'r'))
 
-cap = cv2.VideoCapture('twojony.mp4')
+cap = cv2.VideoCapture('cuttwo.mp4')
 framecount = 0.0;
 fps = 25.0
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 # # print length
-width  = 1376
+width  = 1376 + np.size(img[0], 0)
 # # print width
 height = 960
 # # print height
 capSize = (width,height) # this is the size of my source video
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-success = cv2.VideoWriter('TwoObject.mp4',fourcc,fps,capSize)
+success = cv2.VideoWriter('TwoShort.mp4',fourcc,fps,capSize)
 error=0;
 for i in range(len(img)-1):
     #print np.size(i,0)
