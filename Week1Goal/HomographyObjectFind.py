@@ -3,6 +3,14 @@ import numpy as np
 import cv2
 import DataManipulationWeek1
 
+'''This program uses the data manipulation methods in DataManipulationWeek1.py
+to go through the input video and overlay our own circle onto the gaze location.
+Additionally, we use feature matching algorithms (SIFT and FLANN) to detect the
+object and find the edges of that object. Using the border calculated by these
+algorithms, we can determine whether or not the subject is gazing at the object,
+which is displayed at the top of the screen.'''
+
+
 MIN_MATCH_COUNT = 10
 
 img1 = cv2.imread('feature1.png',0)          # queryImage

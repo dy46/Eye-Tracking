@@ -2,7 +2,7 @@ import math
 import numpy as np
 import cv2
 
-
+'''Class for the DataPoint object which stores gaze location at each tick of the raw data.'''
 class DataPoint(object):
 	def __init__(self, vidname, tmili, x, y):
 		self.__vidname = vidname
@@ -24,11 +24,13 @@ class DataPoint(object):
 	def setVidName(self, name):
 		self.__vidname = name
 
-
+'''Creates a DataPoint object with properties passed in.'''
 def make_dpoint(vidname, tmili, x, y):
-    dpoint = DataPoint("", 0, 0, 0)
+    dpoint = DataPoint(vidname, tmili, x, y)
     return dpoint
 
+'''Binary search implementation to search for the point in the data that 
+is the closest to the passed in value.'''
 def binarySearch(data, val):
     lo, hi = 0, len(data) - 1
     best_ind = lo
@@ -46,6 +48,8 @@ def binarySearch(data, val):
             best_ind = mid
     return best_ind
 
+'''Creates the video data based on the raw data passed in.
+The parsing within this method would only work with data from the SMI glasses.'''
 def createVideoData(textFile): 
 	videoData = list(list())
 	set_up = True;
@@ -82,6 +86,8 @@ def createVideoData(textFile):
 	# print 'Ending'
 	return vid
 
+'''Draws a circle on the passed in frame that correlates with the gaze location
+at the passed in framecount.'''
 def drawCircle(frame, frameCount, videoData, idx, tail):
 	# hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 	alpha = 7 #delay factor
