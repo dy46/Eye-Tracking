@@ -1,7 +1,7 @@
 import math
 import numpy as np
 import cv2
-import datamani
+import DataManipulation
 
 MIN_MATCH_COUNT = 5
 
@@ -9,7 +9,7 @@ img = [cv2.imread('1.png',0), cv2.imread('feature1.png', 0)]
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-videoData = datamani.createVideoData(open('1.txt', 'r'))
+videoData = DataManipulation.createVideoData(open('1.txt', 'r'))
 
 cap = cv2.VideoCapture('twojony.mp4')
 framecount = 0.0;
@@ -81,7 +81,7 @@ while (True):
             print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
             matchesMask = None
         if First == True:
-            img2, x, y, idx, tail = datamani.drawCircle(img2, framecount, videoData, idx, tail)
+            img2, x, y, idx, tail = DataManipulation.drawCircle(img2, framecount, videoData, idx, tail)
             framecount = framecount + (1.0/25.0)*1000.0
         draw_params = dict(matchColor = (0,255,0), # draw matches in green color
                            singlePointColor = None,
@@ -133,7 +133,7 @@ while (True):
         #         print "Not enough matches are found - %d/%d" % (len(x),MIN_MATCH_COUNT)
         #         matchesMask.append(None)
 
-        # imgF, x, y, idx, tail = datamani.drawCircle(imgF, framecount, videoData, idx, tail)
+        # imgF, x, y, idx, tail = DataManipulation.drawCircle(imgF, framecount, videoData, idx, tail)
         # framecount = framecount + (1.0/25.0)*1000.0
         # draw_params = list()
         # for x in matchesMask: 
