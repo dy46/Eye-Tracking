@@ -89,10 +89,10 @@ def createVideoData(textFile):
 	# print 'Ending'
 	return vid
 
-def drawCircle(frame, frameCount, videoData, Idx, Tail):
+def drawCircle(frame, frameCount, videoData, Idx, Tail,fps):
 	# hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 	alpha = 10
-	delayFactor = 6 - int(frameCount/((1.0/25.0)*1000.0) /  alpha)#delay factor
+	delayFactor = 6 - int(frameCount/((1.0/fps)*1000.0) /  alpha)#delay factor
 	data = videoData[Idx:Tail]
 	idx_sub = binarySearch(data, frameCount)
 	Idx = Idx+idx_sub
