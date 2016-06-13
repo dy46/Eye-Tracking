@@ -26,6 +26,7 @@ capSize = (width,height) # this is the size of my source video
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
 success = cv2.VideoWriter('TwoShort.mp4',fourcc,fps,capSize)
 
+# Define binary search parameters
 idx = 0 
 tail = 10
 i = 0

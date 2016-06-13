@@ -4,12 +4,12 @@ from PIL import Image
 import sys
 
 class Position:
-    color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
-    def __init__(self, x, y, ymax, f):
+    def __init__(self, x, y, ymax, f, color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]):
         self.x = x
         self.y = y
         self.ymax = ymax
         self.f = f
+        self.color = color
 
     def getCoordinates(self):
         return self.__x, self.__y
