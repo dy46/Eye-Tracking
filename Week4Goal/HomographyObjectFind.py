@@ -85,7 +85,7 @@ def getFrame(queue, startFrame, endFrame, fourcc, fps, capSize):
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame)  # opencv3            
         frameNo = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # opencv3
         ret, f = cap.read()
-        #f = edit(f)
+        f = edit(f)
         success.write(f)
         if ret:
             print("{} - put ({})".format(mp.current_process(), frameNo))
@@ -102,7 +102,6 @@ if __name__ == '__main__':
     tail = 10
     i = 0
     font = cv2.FONT_HERSHEY_SIMPLEX
-    processCount = 2
     img = [cv2.imread('1.png',0), cv2.imread('feature1.png', 0)] ## Reads in comparison images
     videoData = datamani.createVideoData(open('1.txt', 'r')) ## Reads in data file
     file = "cuttwo.mp4"
@@ -120,31 +119,39 @@ if __name__ == '__main__':
 
     # get cpuCount for processCount
     # processCount = mp.cpu_count() / 3
-    processCount = 2
+    processCount = 3
 
     inQ1 = mp.JoinableQueue()  # not sure if this is right queue type, but I also tried mp.Queue()
     inQ2 = mp.JoinableQueue()
-    qList = [inQ1, inQ2]
-
+    inQ3 = mp.JoinableQueue()
+    qList = [inQ1, inQ2, inQ3]
+    print fileLen
     # set up bunches
     bunches = []
-    for startFrame in range(0, fileLen, int(fileLen / (processCount-1))):
-        endFrame = startFrame + int(fileLen / (processCount-1))
+    ratio = int(fileLen/processCount)
+    for startFrame in range(0, fileLen, ratio):
+        endFrame = startFrame + ratio
+        if fileLen-startFrame< 2*ratio:
+            endFrame = fileLen
+            bunches.append((startFrame, endFrame))
+            break
         bunches.append((startFrame, endFrame))
     print bunches
     getFrames = []
-    # for i in range(processCount):
-    #     getFrames.append(mp.Process(target=getFrame, args=(qList[i], bunches[i][0], bunches[i][1], fourcc, fps, capSize)))
+    for i in range(processCount):
+        getFrames.append(mp.Process(target=getFrame, args=(qList[i], bunches[i][0], bunches[i][1], fourcc, fps, capSize)))
 
-    # for process in getFrames:
-    #     process.start()
+    for process in getFrames:
+        process.start()
 
-    # results1 = [inQ1.get() for p in range(bunches[0][0], bunches[0][1])]
-    # results2 = [inQ2.get() for p in range(bunches[1][0], bunches[1][1])]
+    results1 = [inQ1.get() for p in range(bunches[0][0], bunches[0][1])]
+    results2 = [inQ2.get() for p in range(bunches[1][0], bunches[1][1])]
+    results3 = [inQ3.get() for p in range(bunches[2][0], bunches[2][1])]
 
-    # inQ1.close()
-    # inQ2.close()
+    inQ1.close()
+    inQ2.close()
+    inQ3.close()
 
-    # for process in getFrames:
-    #     process.terminate()
-    #     process.join()
+    for process in getFrames:
+        process.join()
+        process.terminate()
