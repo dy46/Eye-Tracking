@@ -101,5 +101,8 @@ def drawCircle(frame, frameCount, videoData, Idx, Tail,fps):
 	if point > len(videoData) - 1:
 		point = len(videoData) - 1
 	x, y = videoData[point].getCoordinates()
+	if x == None or y == None:
+		return frame, x, y, Idx, Tail, True
+
 	cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 20)
-	return frame, x, y, Idx, Tail
+	return frame, x, y, Idx, Tail, False
