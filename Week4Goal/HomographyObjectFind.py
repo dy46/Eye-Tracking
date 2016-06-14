@@ -85,7 +85,7 @@ def getFrame(queue, startFrame, endFrame, fourcc, fps, capSize):
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame)  # opencv3            
         frameNo = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # opencv3
         ret, f = cap.read()
-        f = edit(f)
+        #f = edit(f)
         success.write(f)
         if ret:
             print("{} - put ({})".format(mp.current_process(), frameNo))
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     # get cpuCount for processCount
     # processCount = mp.cpu_count() / 3
-    processCount = 3
+    processCount = 2
 
     inQ1 = mp.JoinableQueue()  # not sure if this is right queue type, but I also tried mp.Queue()
     inQ2 = mp.JoinableQueue()
@@ -146,12 +146,14 @@ if __name__ == '__main__':
 
     results1 = [inQ1.get() for p in range(bunches[0][0], bunches[0][1])]
     results2 = [inQ2.get() for p in range(bunches[1][0], bunches[1][1])]
-    results3 = [inQ3.get() for p in range(bunches[2][0], bunches[2][1])]
+    # results3 = [inQ3.get() for p in range(bunches[2][0], bunches[2][1])]
+
+
+
+    for process in getFrames:
+        process.terminate()
+        process.join()
 
     inQ1.close()
     inQ2.close()
     inQ3.close()
-
-    for process in getFrames:
-        process.join()
-        process.terminate()
