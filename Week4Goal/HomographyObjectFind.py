@@ -1,5 +1,6 @@
 import cv2
 import multiprocessing as mp
+from multiprocessing import queues
 import math
 import numpy as np
 import datamani
@@ -85,7 +86,7 @@ def edit(f, currentFrame, i):
     FRAMECOUNT[i] = framecount
     return img3
 
-def getFrame(queue, startFrame, endFrame, fourcc, fps, capSize, i):
+def getFrame(frameList, startFrame, endFrame, fourcc, fps, capSize, i):
     cap = cv2.VideoCapture(file)  # crashes here
     # print("opened capture {}".format(mp.current_process()))
     for frame in range(startFrame, endFrame):
@@ -96,7 +97,7 @@ def getFrame(queue, startFrame, endFrame, fourcc, fps, capSize, i):
         f = edit(f, frame, i)
         if ret:
             # print("{} - put ({})".format(mp.current_process(), frameNo))
-            queue.put((frameNo, f))
+            frameList.append((frameNo, f))
     cap.release()
 
 
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     processCount = 4
     qList = []
     for i in range(processCount):
-        qList.append(mp.JoinableQueue())
+        qList.append(list())
     # inQ1 = mp.JoinableQueue()  # not sure if this is right queue type, but I also tried mp.Queue()
     # inQ2 = mp.JoinableQueue()
     # inQ3 = mp.JoinableQueue()
@@ -163,7 +164,7 @@ if __name__ == '__main__':
 
     results = []
     for i in range(len(qList)):
-        results.append([qList[i].get() for p in range(bunches[i][0], bunches[i][1])])
+        results.append([qList[i].pop(0) for p in range(bunches[i][0], bunches[i][1])])
 
     # results1 = results[0]
     # results2 = results[1]
