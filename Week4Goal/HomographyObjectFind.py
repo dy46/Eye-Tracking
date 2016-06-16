@@ -127,7 +127,7 @@ if __name__ == '__main__':
     success = cv2.VideoWriter('Perrovida.mp4',fourcc,fps,capSize)
     # get cpuCount for processCount
     # processCount = mp.cpu_count() / 3
-    processCount = 4
+    processCount = 3
     qList = []
     for i in range(processCount):
         qList.append(mp.JoinableQueue())
