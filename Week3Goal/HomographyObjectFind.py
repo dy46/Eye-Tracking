@@ -7,13 +7,13 @@ from drMatches import Position
 
 MIN_MATCH_COUNT = 5
 
-img = [cv2.imread('1.png',0), cv2.imread('feature1.png', 0)]
+img = [cv2.imread('1.png',0), cv2.imread('Benedryl.png', 0)]
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 
-videoData = DataManipulation.createVideoData(open('1.txt', 'r'))
+videoData = DataManipulation.createVideoData(open('Three_Objects_Raw_Data.txt', 'r'))
 
-cap = cv2.VideoCapture('cuttwo.mp4')
+cap = cv2.VideoCapture('Three_Objects_With_Point.mp4')
 framecount = 0.0;
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 # # print length
@@ -24,7 +24,7 @@ height, width = temp.shape[:2]
 
 capSize = (width,height) # this is the size of my source video
 fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-success = cv2.VideoWriter('TwoShort.mp4',fourcc,fps,capSize)
+success = cv2.VideoWriter('Three_Objects_Output.mp4',fourcc,fps,capSize)
 
 # Define binary search parameters
 idx = 0 
