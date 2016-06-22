@@ -51,38 +51,40 @@ def createVideoData(textFile):
 	set_up = True;
 
 	# Skip top line of text file because no data is contained there.
-	textFile.next()
+	for i in range(34):
+		textFile.next()
 	points = list()
 	for line in textFile:
 		dp = make_dpoint('', 0, 0, 0)
 		dataline = line.split()
-		cvt = dataline[3] #current video title
-		dp.setVidName(cvt)
+		# cvt = dataline[3] #current video title
+		# dp.setVidName(cvt)
 		if set_up:
 			tnot = float(dataline[0])
-			pvt = cvt
+			# pvt = cvt
 			set_up = False
-		if pvt != cvt:
-			videoData.append(points)
-			points = list()
-			tnot = float(dataline[0])
+		# if pvt != cvt:
+		# 	videoData.append(points)
+		# 	points = list()
+		# 	tnot = float(dataline[0])
 		dp.setTMili(float(dataline[0])-tnot)
-		if dataline[11] == '2':
-			if dataline[16] == 'Blink' or dataline[16] == 'Saccade':
-				dp.setCoordinates(float(dataline[21]), float(dataline[22]))
-			if dataline[16]=='Visual':
-				dp.setCoordinates(float(dataline[22]), float(dataline[23]))
-		else:
-			if dataline[14]=='Saccade':
-				dp.setCoordinates(float(dataline[19]), float(dataline[20]))
-			else:
-				dp.setCoordinates(float(dataline[20]), float(dataline[21]))
-		pvt = cvt
+		# if dataline[11] == '2':
+		# 	if dataline[16] == 'Blink' or dataline[16] == 'Saccade':
+		# 		dp.setCoordinates(float(dataline[21]), float(dataline[22]))
+		# 	if dataline[16]=='Visual':
+		# 		dp.setCoordinates(float(dataline[22]), float(dataline[23]))
+		# else:
+		# 	if dataline[14]=='Saccade':
+		# 		dp.setCoordinates(float(dataline[19]), float(dataline[20]))
+		# 	else:
+		# 		dp.setCoordinates(float(dataline[20]), float(dataline[21]))
+		dp.setCoordinates(float(dataline[3]), float(dataline[4]))
+		# pvt = cvt
 		points.append(dp)
 
 	videoData.append(points)
 
-	vid = videoData[2]
+	vid = videoData[0]
 	# print 'Starting'
 	# for x in vid:
 	# 	print x.getTMili()
