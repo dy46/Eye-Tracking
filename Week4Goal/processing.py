@@ -15,7 +15,7 @@ def getFrame(queue, startFrame, endFrame, i, videoFile, frameCounts, indices, ta
     # print("opened capture {}".format(mp.current_process()))
     for frame in range(startFrame, endFrame):
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame)  # opencv3
-        # print frame            
+        print frame         
         frameNo = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # opencv3
         ret, f = cap.read()
         f = processImage(f, frame, i, fps, frameCounts, indices, tails, img, data)
@@ -23,6 +23,20 @@ def getFrame(queue, startFrame, endFrame, i, videoFile, frameCounts, indices, ta
             # print("{} - put ({})".format(mp.current_process(), frameNo))
             queue.append([frameNo, f])
     cap.release()
+
+def singleProcess(processCount, fileLength, videoFile, fps, img, data):
+    frameQueue = []
+
+    bunches, frameCounts, indices, tails = createArrays(1, fileLength, fps)
+
+    getFrame(frameQueue, 0, fileLength - 1, 0, videoFile, frameCounts, indices, tails, fps, img, data)
+
+    results = []
+
+    for i in range(bunches[0][0], bunches[0][1] - 1):
+        results.append(frameQueue[i])
+
+    return results, False
 
 def multiProcess(processCount, fileLength, videoFile, fps, img, data):
     qList = []
@@ -83,17 +97,3 @@ def terminate(processes, queues):
 
     for queue in queues:
         queue.close()
-
-def singleProcess(processCount, fileLength, videoFile, fps, img, data):
-    frameQueue = []
-
-    bunches, frameCounts, indices, tails = createArrays(1, fileLength, fps)
-
-    getFrame(frameQueue, 0, fileLength - 1, 0, videoFile, frameCounts, indices, tails, fps, img, data)
-
-    results = []
-
-    for i in range(bunches[0][0], bunches[0][1] - 1):
-    	results.append(frameQueue[i])
-
-    return results, False

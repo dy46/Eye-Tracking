@@ -1,13 +1,13 @@
 import numpy as np
 import cv2
-from shapely.geometry import Polygon
+# from shapely.geometry import Polygon
 import sys
 import polygons_overlapping 
 
 MIN_MATCH_COUNT = 15
 
-img1 = cv2.imread('current2.png',0)          # queryImage
-img2 = cv2.imread('feature4.png',0) # trainImage
+img1 = cv2.imread('ipuprofen_reference.png',0)          # queryImage
+img2 = cv2.imread('ipuprofen.png',0) # trainImage
 imgt=img2.copy()
 # Initiate SIFT detector
 sift = cv2.xfeatures2d.SIFT_create()
@@ -74,22 +74,22 @@ for y in range(4):
 						poly_template.append(arr)
 
 				poly_current = np.asarray(poly_currentarr)
-				if len(poly_arr)>0:
-					for p in poly_arr:
-						if polygons_overlapping.pair_overlapping(p, poly_current) ==2:
-							print 2
-							print poly_template[0]
-							xnot=dst[0][0][0]
-							ynot = dst[0][0][1]
-							t2_a = []
-							for i in range(len(poly_template)):
-								print "Im here"
-								t2_b = []
-								t_a =np.array([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
-								t2_b.append(t_a)
-								t2_a.append(t2_b)
-							t3_a = np.array(t2_a)
-							dst = t3_a
+				# if len(poly_arr)>0:
+				# 	for p in poly_arr:
+				# 		if polygons_overlapping.pair_overlapping(p, poly_current) ==2:
+				# 			print 2
+				# 			print poly_template[0]
+				# 			xnot=dst[0][0][0]
+				# 			ynot = dst[0][0][1]
+				# 			t2_a = []
+				# 			for i in range(len(poly_template)):
+				# 				print "Im here"
+				# 				t2_b = []
+				# 				t_a =np.array([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
+				# 				t2_b.append(t_a)
+				# 				t2_a.append(t2_b)
+				# 			t3_a = np.array(t2_a)
+				# 			dst = t3_a
 
 
 				print dst

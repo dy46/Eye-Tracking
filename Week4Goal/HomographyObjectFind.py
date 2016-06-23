@@ -220,9 +220,9 @@ if __name__ == '__main__':
     ######## Initialize Constants ########
     # framecount = 0.0;
     i = 0
-    img = [cv2.imread('1.png',0), cv2.imread('feature1.png', 0)] ## Reads in comparison images
-    videoData = datamani.createVideoData(open('1.txt', 'r')) ## Reads in data file
-    file = "cuttwo.mp4"
+    img = [cv2.imread('ipuprofen_reference.png', 0), cv2.imread('current.png',0)] ## Reads in comparison images
+    videoData = datamani.createVideoData(open('Three_Objects_Raw_Data.txt', 'r')) ## Reads in data file
+    file = "Three_Objects_No_Point.mp4"
     capture_temp = cv2.VideoCapture(file)
     fileLen = int((capture_temp).get(cv2.CAP_PROP_FRAME_COUNT))  # opencv3
     fps = capture_temp.get(cv2.CAP_PROP_FPS) ##fps
@@ -235,7 +235,7 @@ if __name__ == '__main__':
     # print "File length: "+ str(fileLen)
     capSize = (width,height) ## this is the size of my source video
     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v') ## starts ouput file
-    success = cv2.VideoWriter('Perrovida.mp4',fourcc,fps,capSize)
+    success = cv2.VideoWriter('Please_Work.mp4',fourcc,fps,capSize)
     # get cpuCount for processCount
     # processCount = mp.cpu_count() / 3
     print "Processing"

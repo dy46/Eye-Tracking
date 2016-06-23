@@ -4,7 +4,7 @@ from PIL import Image
 import sys
 
 class Position:
-    color = [(255, 0, 0), (0, 255, 0), (0, 0, 255)]
+    color = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255)]
     def __init__(self, x, y, ymax, f):
         self.x = x
         self.y = y
@@ -13,12 +13,53 @@ class Position:
 
     def getCoordinates(self):
         return self.__x, self.__y
-    def setCoordinates(self):
+    def setCoordinates(self, x, y):
         self.__x, self.__y = x, y
     def getColor(self):
-        return self.color[self.f]
+        # print self.f
+        return (255, 0, 0)
 
+def binarySearch(data, val):
+    val = val * 1000
+    lo, hi = 0, len(data) - 1
+    best_ind = lo
+    while lo <= hi:
+        mid = lo + (hi - lo) / 2
+        if data[mid].getTMili() < val:
+            lo = mid + 1
+        elif data[mid].getTMili() > val:
+            hi = mid - 1
+        else:
+            best_ind = mid
+            break
+        # check if data[mid] is closer to val than data[best_ind] 
+        if abs(data[mid].getTMili() - val) < abs(data[best_ind].getTMili() - val):
+            best_ind = mid
+    return best_ind
 
+def getXY(frame, frameCount, videoData, Idx, Tail,fps, ignore):
+    # hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+    alpha = 10
+    delayFactor = 6 - int(frameCount/((1.0/fps)*1000.0) /  alpha)#delay factor
+    # data = videoData[Idx:Tail]
+    # lowt = videoData[Idx].getTMili()
+    # hight = videoData[Tail].getTMili()
+    idx_sub = binarySearch(videoData, frameCount)
+    # Idx = Idx+idx_sub
+    # Tail = Idx+10
+    point = idx_sub
+    # point = idx_sub
+    if point > len(videoData) - 1:
+        point = len(videoData) - 1
+    x, y = videoData[point].getCoordinates()
+
+    tpoint = videoData[point].getTMili()
+    # print str(frameCount)+'           '+str(lowt)+'             ' +str(tpoint)+ '            ' +str(hight)
+    if x == None or y == None:
+        return frame, x, y, Idx, Tail, True
+
+    # cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 20)
+    return x, y
 
 def drawMatches(img1, kp1, img2, kp2, matches, pos):
     height1, width1 = img1.shape[:2]
@@ -50,13 +91,13 @@ def drawMatches(img1, kp1, img2, kp2, matches, pos):
         # radius 4
         # colour blue
         # thickness = 1
-        cv2.circle(out, (int(x1+pos.x),int(y1+pos.y)), 2, pos.getColor(), 2)   
-        cv2.circle(out, (int(x2),int(y2)), 2, pos.getColor(), 2)
+        # cv2.circle(out, (int(x1+pos.x),int(y1+pos.y)), 2, pos.getColor(), 2)   
+        # cv2.circle(out, (int(x2),int(y2)), 2, pos.getColor(), 2)
 
         # Draw a line in between the two points
         # thickness = 1
         # colour blue
-        cv2.line(out, (int(x1+pos.x),int(y1+pos.y)), (int(x2),int(y2)), pos.getColor(), 1)
+        # cv2.line(out, (int(x1+pos.x),int(y1+pos.y)), (int(x2),int(y2)), pos.getColor(), 1)
 
     pos.x = pos.x+width1
     pos.f = pos.f+1
