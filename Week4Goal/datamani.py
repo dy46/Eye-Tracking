@@ -11,7 +11,7 @@ class DataPoint(object):
 		self.__y = y
 	# vidname = ""
 	# tmili = 0
-	# x = 0
+	# x = 0f
 	# y = 0
 	def getCoordinates(self):
 		return self.__x, self.__y
@@ -62,7 +62,7 @@ def createVideoData(textFile):
 		# dp.setVidName(cvt)
 		if set_up:
 			tnot = float(dataline[0])
-			print tnot
+			# print tnot
 			# pvt = cvt
 			set_up = False
 		# if pvt != cvt:
@@ -70,7 +70,7 @@ def createVideoData(textFile):
 		# 	points = list()
 		# 	tnot = float(dataline[0])
 		dp.setTMili(float(dataline[0])-tnot)
-		print dp.getTMili()
+		# print dp.getTMili()
 		# if dataline[11] == '2':
 		# 	if dataline[16] == 'Blink' or dataline[16] == 'Saccade':
 		# 		dp.setCoordinates(float(dataline[21]), float(dataline[22]))
@@ -102,7 +102,7 @@ def drawCircle(frame, frameCount, videoData, Idx, Tail,fps, ignore):
 	# lowt = videoData[Idx].getTMili()
 	# hight = videoData[Tail].getTMili()
 	idx_sub = binarySearch(videoData, frameCount)
-	print idx_sub
+	# print idx_sub
 	# Idx = Idx+idx_sub
 	# Tail = Idx+10
 	point = idx_sub

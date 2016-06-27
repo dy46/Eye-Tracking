@@ -57,21 +57,22 @@ def loopThroughReference(img):
         first = 0
         ''' Check the frame for all instances that have the necessary matches for reference picture '''
         while True:
-            good_matches= featureMatch()
+            good_matches= featureMatch(currentFrame)
             matchesMask, ignore, dst, break_flag = drawBorders(good_matches)
             if break_flag:
-                print "break"
+                # print "break"
                 break
             x, y = getXY(img2, framecount, videoData, idx, tail, fps, ignore)
             placeText(ignore, i, dst, x, y)
             first += 1
     return ignore, goodmatches
 
-def featureMatch():
+def featureMatch(currentFrame):
     global kp1, kp2
     sift = cv2.xfeatures2d.SIFT_create()
 
     kp1, des1 = sift.detectAndCompute(img1,None)
+    # print imgt
     kp2, des2 = sift.detectAndCompute(imgt,None)
 
     FLANN_INDEX_KDTREE = 0
@@ -79,7 +80,9 @@ def featureMatch():
     search_params = dict(checks = 50)
 
     flann = cv2.FlannBasedMatcher(index_params, search_params)
-
+    # if currentFrame == 35:
+    #     print 'this is des1: '+ str(des1)
+    #     print 'this is des2: '+str(des2)
     matches = flann.knnMatch(des1, des2, k=2)
 
     good = []
@@ -184,7 +187,7 @@ def placeText(ignore, i, dst, x, y):
         s[i][2]=dst[0][0][1];
         s[i][3]=dst[2][0][1];
         if x>s[i][0] and x<s[i][1] and y>s[i][2] and y<s[i][3]:
-            print "Hi"
+            # print "Hi"
             object_number = i + 1
             flag = False
 
@@ -197,78 +200,9 @@ def processImage(f, currentFrame, index, frames_per_second, FRAMECOUNT, IDX, TAI
     img2 = f
     videoData = data
 
-    startProcess(img)
+    startProcess(img, currentFrame)
 
     IDX[index] = idx
     TAIL[index] = tail
     FRAMECOUNT[index] = framecount
     return img3
-
-
-
-
-# def edit(f, currentFrame, index, fps, FRAMECOUNT, IDX, TAIL, img, videoData):
-#     framecount = currentFrame * 1000.0/fps
-#     idx = IDX[index]
-#     tail = TAIL[index]
-#     img3 = 0
-#     img2 = f ## get frame from the queue
-#     for i,img1 in enumerate(img):
-#         ignore = False;
-#         if First == False:
-#             img2 = img3
-#         kp1, des1 = sift.detectAndCompute(img1,None)
-#         kp2, des2 = sift.detectAndCompute(img2,None)
-
-#         FLANN_INDEX_KDTREE = 0
-#         index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
-#         search_params = dict(checks = 50)
-
-#         flann = cv2.FlannBasedMatcher(index_params, search_params)
-
-#         matches = flann.knnMatch(des1,des2,k=2)
-
-#         # store all the good matches as per Lowe's ratio test.
-#         good = []
-#         for m,n in matches:
-#             if m.distance < 0.7*n.distance:
-#                 good.append(m)
-
-#         if len(good)>MIN_MATCH_COUNT:
-#             src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
-#             dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
-
-#             M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
-#             matchesMask = mask.ravel().tolist()
-
-#             h,w = img1.shape
-#             pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-#             dst = cv2.perspectiveTransform(pts,M)
-#             img2 = cv2.polylines(img2,[np.int32(dst)],True,pos.getColor(),3, cv2.LINE_AA)
-#             # cv2.circle(img2, (int(float(PoRBX[idx])),int(float(PoRBY[idx]))), 10, (255, 0, 0), 20)
-#         else:
-#             # print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
-#             matchesMask = None
-#             ignore = True
-
-#         if First == True:
-#             img2, x, y, idx, tail ,ignore= datamani.drawCircle(img2, framecount, videoData, idx, tail, fps, ignore)
-#             framecount = framecount + (1.0/fps)*1000.0
-#         img3, pos = drMatches.drawMatches(img1,kp1,img2,kp2,good, pos) ## line must not execute
-#         First = False
-#         # print str(mp.current_process()) + "Ignore: " + str(ignore)
-#         if not ignore:
-#             s[i][0]=dst[0][0][0];
-#             s[i][1]=dst[3][0][0];
-#             s[i][2]=dst[0][0][1];
-#             s[i][3]=dst[2][0][1];
-#             if x>s[i][0] and x<s[i][1] and y>s[i][2] and y<s[i][3]:
-#                 cv2.putText(img3,'Gazing at the '+str(i+1)+' object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
-#                 flag = False
-#         ### HERE WHAT I WANT TO DO IS PROCESS THIS WITH A DIFFERENT IMAGE USING IMG3 as my new framw
-#     if flag:
-#         cv2.putText(img3,'Gazing at none of the object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
-#     IDX[index] = idx
-#     TAIL[index] = tail
-#     FRAMECOUNT[index] = framecount
-#     return img3

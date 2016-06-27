@@ -13,16 +13,22 @@ import sys
 def getFrame(queue, startFrame, endFrame, i, videoFile, frameCounts, indices, tails, fps, img, data):
     cap = cv2.VideoCapture(videoFile)  # crashes here
     # print("opened capture {}".format(mp.current_process()))
+    # print type(queue)
     for frame in range(startFrame, endFrame):
+        if frame in {35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45}:
+            continue
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame)  # opencv3
-        print frame         
+        print 'Current frame: '+ str(frame)         
         frameNo = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # opencv3
         ret, f = cap.read()
         f = processImage(f, frame, i, fps, frameCounts, indices, tails, img, data)
         if ret:
-            # print("{} - put ({})".format(mp.current_process(), frameNo))
-            queue.append([frameNo, f])
-    cap.release()
+            try:
+                queue.append([frameNo, f])
+            except:
+                queue.put([frameNo, f])
+    if frame not in {35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45}:
+        cap.release()
 
 def singleProcess(processCount, fileLength, videoFile, fps, img, data):
     frameQueue = []
@@ -54,8 +60,7 @@ def multiProcess(processCount, fileLength, videoFile, fps, img, data):
     # print bunches
     getFrames = []
     for i in range(processCount):
-        getFrames.append(mp.Process(target=getFrame, args=(qList[i], 
-        	bunches[i][0], bunches[i][1], i, videoFile, frameCounts, indices, tails, fps, img, data)))
+        getFrames.append(mp.Process(target=getFrame, args=(qList[i], bunches[i][0], bunches[i][1], i, videoFile, frameCounts, indices, tails, fps, img, data)))
     # print "FrameCount:"+'             '+ "Low Time"+'              '+"Actual Time: "+'          '+ "High Time "
 
     for process in getFrames:
@@ -67,7 +72,6 @@ def multiProcess(processCount, fileLength, videoFile, fps, img, data):
 
     terminate(getFrames, qList)
     return results, True
-
 def divideFrames(processCount, fileLength):
     bunches = []
     ratio = int(fileLength/processCount)

@@ -70,7 +70,7 @@ def drawMatches(img1, kp1, img2, kp2, matches, pos):
     background = Image.fromarray(img2)
     if pos.x+width1>width2:
         pos.setCoordinates(0, pos.ymax)
-    background.paste(foreground, (pos.x, pos.y), foreground)
+    # background.paste(foreground, (pos.x, pos.y), foreground)
     out = np.array(background)
     #print pos.getColor
     #cv2.circle(out, (int(100),int(100)), 1, pos.getColor(), 50)
