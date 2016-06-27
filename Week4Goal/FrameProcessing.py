@@ -24,24 +24,38 @@ object_number = None
 first = 0
 
 def startProcess(img):
-    global img1, img2, img3, imgt, s, pos, first_run_flag, poly_arr, poly_template, first, flag
-    global idx, tail, framecount
+    global img3
 
     # Initiate SIFT detector
     # find the keypoints and descriptors with SIFT
+
+    ''' Loop through all the reference pictures '''
+    ignore, goodmatches = loopThroughReference(img)
+
+    drawCircleAndMatches(ignore, good_matches)
+    if flag:
+        cv2.putText(img3,'Gazing at none of the object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
+    else:
+        cv2.putText(img3,'Gazing at the '+str(object_number)+' object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
+
+    cv2.imshow("hi", img3)
+    cv2.waitKey(10)
+
+def loopThroughReference(img):    
+    global img1, img2, imgt, poly_arr, poly_template, first, s, pos, flag, first_run_flag
     s=np.zeros((4,4))
     #print s.dtype
     pos = Position(0,0,0,0)
     flag = True
 
     first_run_flag = True
-
     for i, img1 in enumerate(img):
         if first_run_flag == False:
             img2 = img3
         poly_arr, poly_template = [], []
         imgt = img2.copy()
         first = 0
+        ''' Check the frame for all instances that have the necessary matches for reference picture '''
         while True:
             good_matches= featureMatch()
             matchesMask, ignore, dst, break_flag = drawBorders(good_matches)
@@ -51,16 +65,7 @@ def startProcess(img):
             x, y = getXY(img2, framecount, videoData, idx, tail, fps, ignore)
             placeText(ignore, i, dst, x, y)
             first += 1
-    x, y = drawCircleAndMatches(ignore, good_matches)
-    print x, y, framecount
-    print flag
-    if flag:
-        cv2.putText(img3,'Gazing at none of the object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
-    else:
-        cv2.putText(img3,'Gazing at the '+str(object_number)+' object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
-
-    cv2.imshow("hi", img3)
-    cv2.waitKey(10)
+    return ignore, goodmatches
 
 def featureMatch():
     global kp1, kp2
@@ -170,7 +175,6 @@ def drawCircleAndMatches(ignore, good):
     img3, pos = drMatches.drawMatches(img1,kp1,img2,kp2,good, pos)
     # img3, pos = drMatches.drawMatches(img1,kp1,img2,kp2,good, pos) ## line must not execute
     first_run_flag = False
-    return x, y
 
 def placeText(ignore, i, dst, x, y):
     global s, flag, img3, object_number
