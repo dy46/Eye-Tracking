@@ -47,7 +47,7 @@ def startProcess(img, currentFrame):
             cmatch +=1
             good_matches= featureMatch(currentFrame)
             matchesMask, ignore, dst, break_flag = drawBorders(good_matches)
-            if break_flag or cmatch>10:
+            if break_flag or cmatch>20:
                 # print "break"
                 break
             x, y = getXY(img2, framecount, videoData, idx, tail, fps, ignore)
