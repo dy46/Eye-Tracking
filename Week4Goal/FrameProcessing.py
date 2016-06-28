@@ -6,7 +6,6 @@ import datamani
 import drMatches
 from drMatches import Position, getXY
 import time
-import sys
 import polygons_overlapping
 
 '''Creating instance variables'''
@@ -22,10 +21,11 @@ poly_arr = []
 poly_template = []
 object_number = None
 first = 0
+cmatch = 0
 
 def startProcess(img, currentFrame):
     global img1, img2, img3, imgt, s, pos, first_run_flag, poly_arr, poly_template, first, flag
-    global idx, tail, framecount
+    global idx, tail, framecount, cmatch
 
     # Initiate SIFT detector
     # find the keypoints and descriptors with SIFT
@@ -42,10 +42,12 @@ def startProcess(img, currentFrame):
         poly_arr, poly_template = [], []
         imgt = img2.copy()
         first = 0
+        cmatch = 0
         while True:
+            cmatch +=1
             good_matches= featureMatch(currentFrame)
             matchesMask, ignore, dst, break_flag = drawBorders(good_matches)
-            if break_flag:
+            if break_flag or cmatch>10:
                 # print "break"
                 break
             x, y = getXY(img2, framecount, videoData, idx, tail, fps, ignore)
@@ -59,8 +61,8 @@ def startProcess(img, currentFrame):
     else:
         cv2.putText(img3,'Gazing at the '+str(object_number)+' object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
 
-    cv2.imshow("hi", img3)
-    cv2.waitKey(10)
+    # cv2.imshow("hi", img3)
+    # cv2.waitKey(10)
 
 def featureMatch(currentFrame):
     global kp1, kp2
@@ -79,7 +81,6 @@ def featureMatch(currentFrame):
     #     print 'this is des1: '+ str(des1)
     #     print 'this is des2: '+str(des2)
     matches = flann.knnMatch(des1, des2, k=2)
-
     good = []
     for m,n in matches:
         if m.distance < 0.7*n.distance:
@@ -91,6 +92,7 @@ def drawBorders(good):
     global img2, imgt
     ignore = False
     break_flag = False
+
     if len(good)>MIN_MATCH_COUNT:
         src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
         dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)

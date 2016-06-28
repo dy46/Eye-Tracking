@@ -6,7 +6,6 @@ import datamani
 import drMatches
 from drMatches import Position
 import time
-import sys
 import processing
 from processing import multiProcess, singleProcess
 
@@ -14,7 +13,6 @@ def writeFrames(result, success):
     for frame in result:
         if len(frame) == 0:
             print 'Well it looks like there is an empty image. '+'Frame: '+str(i)
-            sys.exit()
         success.write(frame[1])
 
 if __name__ == '__main__':
@@ -41,7 +39,7 @@ if __name__ == '__main__':
     # processCount = mp.cpu_count() / 3
     # print "Processing"
     processCount = 4
-    results, multi_flag = singleProcess(processCount, fileLen, file, fps, img, videoData)
+    results, multi_flag, getFrames, qList = multiProcess(processCount, fileLen, file, fps, img, videoData)
     #single
     #multi
     # results1 = results[0]
@@ -65,7 +63,8 @@ if __name__ == '__main__':
     #     success.write(i[1])
     # for i in results3:
     #     success.write(i[1])
-
+    if multi_flag:
+        terminate(getFrames, qList)
     success.release()
     print 'I am fucken DONE'
 
