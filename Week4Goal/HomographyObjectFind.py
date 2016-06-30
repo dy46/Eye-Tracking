@@ -19,7 +19,7 @@ if __name__ == '__main__':
     ######## Initialize Constants ########
     # framecount = 0.0;
     i = 0
-    img = [cv2.imread('ipuprofen_reference.png', 0), cv2.imread('advil2.png',0)] ## Reads in comparison images
+    img = [cv2.imread('ibu2.png', 0), cv2.imread('advil2.png',0)] ## Reads in comparison images
     videoData = datamani.createVideoData(open('Three_Objects_Raw_Data.txt', 'r')) ## Reads in data file
     file = "Three_Objects_No_Point_Short.mp4"
     capture_temp = cv2.VideoCapture(file)
@@ -64,7 +64,7 @@ if __name__ == '__main__':
     # for i in results3:
     #     success.write(i[1])
     if multi_flag:
-        terminate(getFrames, qList)
+        processing.terminate(getFrames, qList)
     success.release()
     print 'I am fucken DONE'
 
