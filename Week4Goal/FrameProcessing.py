@@ -147,8 +147,19 @@ def drawBorders(good, currentFrame):
         # print pts
         # print 'dst'
         dst = cv2.perspectiveTransform(pts,M)
+        if currentFrame in [557, 558, 559]:
+            print dst
+            print 'This is dst '+str(dst.size)
         # print dst
+        if len(dst) == 0:
+            print "SO i am working to break"
+            break_flag = True
+            return None, None, None, break_flag
 
+        if dst.size ==0:
+            print "Size is the best method"
+            break_flag = True
+            return None, None, None, break_flag
         poly_currentarr = []
         for i in range(len(dst)):
             sub_dst = dst[i]
@@ -182,10 +193,10 @@ def drawBorders(good, currentFrame):
                     for i in range(len(poly_template)):
                         # print "Im here"
                         t2_b = []
-                        t_a =np.array([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
+                        t_a =np.int32([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
                         t2_b.append(t_a)
                         t2_a.append(t2_b)
-                    t3_a = np.array(t2_a)
+                    t3_a = np.int32(t2_a)
                     dst = t3_a
         if len(poly_arr)==0 and not current_rec:
             xnot=dst[0][0][0]
@@ -193,14 +204,31 @@ def drawBorders(good, currentFrame):
             t2_a = []
             for i in range(len(poly_template)):
                 t2_b = []
-                t_a =np.array([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
+                t_a =np.int32([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
                 t2_b.append(t_a)
                 t2_a.append(t2_b)
-            t3_a = np.array(t2_a)
+            t3_a = np.int32(t2_a)
             dst = t3_a
         poly_arr.append(poly_current)
-        img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
-        imgt = cv2.fillPoly(imgt,[np.int32(dst)],(0,0,0))
+
+        if currentFrame in [557, 558, 559]:
+            if currentFrame == 558:
+                print 'FUCK i suck'
+            print 'dst'
+            print dst
+            print 'int32'
+            print [np.int32(dst)]
+            # cv2.imshow('img2', img2)
+            # cv2.waitKey(0)
+            # cv2.imshow('imgt', imgt)
+            # cv2.waitKey(0)
+        try: 
+            img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
+            imgt = cv2.fillPoly(imgt,[np.int32(dst)],(0,0,0))
+        except:
+            print 'EXCEPT BREAK'
+            break_flag = True
+            return None, None, None, break_flag
     else:
         # print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         matchesMask = None
@@ -210,8 +238,8 @@ def drawBorders(good, currentFrame):
     # if currentFrame == 40:
     #     cv2.imshow('img',imgt)
     #     cv2.waitKey(0)
-    cv2.imshow('img2', img2)
-    cv2.waitKey(5)
+    # cv2.imshow('img2', img2)
+    # cv2.waitKey(5)
     return matchesMask, ignore, dst, break_flag
 
 def drawCircleAndMatches(ignore, good):
