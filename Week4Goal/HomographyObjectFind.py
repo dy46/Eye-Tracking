@@ -6,7 +6,6 @@ import datamani
 import drMatches
 from drMatches import Position
 import time
-import sys
 import processing
 from processing import multiProcess, singleProcess
 
@@ -14,14 +13,13 @@ def writeFrames(result, success):
     for frame in result:
         if len(frame) == 0:
             print 'Well it looks like there is an empty image. '+'Frame: '+str(i)
-            sys.exit()
         success.write(frame[1])
 
 if __name__ == '__main__':
     ######## Initialize Constants ########
     # framecount = 0.0;
     i = 0
-    img = [cv2.imread('ipuprofen_reference.png', 0), cv2.imread('current.png',0)] ## Reads in comparison images
+    img = [cv2.imread('ipuprofen_reference.png', 0), cv2.imread('advil2.png',0)] ## Reads in comparison images
     videoData = datamani.createVideoData(open('Three_Objects_Raw_Data.txt', 'r')) ## Reads in data file
     file = "Three_Objects_No_Point_Short.mp4"
     capture_temp = cv2.VideoCapture(file)
@@ -40,8 +38,8 @@ if __name__ == '__main__':
     # get cpuCount for processCount
     # processCount = mp.cpu_count() / 3
     # print "Processing"
-    processCount = 4
-    results, multi_flag = singleProcess(processCount, fileLen, file, fps, img, videoData)
+    processCount = 2
+    results, multi_flag, getFrames, qList = singleProcess(processCount, fileLen, file, fps, img, videoData)
     #single
     #multi
     # results1 = results[0]
@@ -65,7 +63,8 @@ if __name__ == '__main__':
     #     success.write(i[1])
     # for i in results3:
     #     success.write(i[1])
-
+    if multi_flag:
+        terminate(getFrames, qList)
     success.release()
     print 'I am fucken DONE'
 

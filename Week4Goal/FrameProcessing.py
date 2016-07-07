@@ -6,8 +6,8 @@ import datamani
 import drMatches
 from drMatches import Position, getXY
 import time
-import sys
 import polygons_overlapping
+import FrameBFS
 
 '''Creating instance variables'''
 MIN_MATCH_COUNT = 30
@@ -22,50 +22,57 @@ poly_arr = []
 poly_template = []
 object_number = None
 first = 0
+cmatch = 0
+polygon_looked = []
 
-def startProcess(img):
-    global img3
+def startProcess(img, currentFrame):
+    global img1, img2, img3, imgt, s, pos, first_run_flag, poly_arr, poly_template, first, flag, polygon_looked
+    global idx, tail, framecount, cmatch
 
     # Initiate SIFT detector
     # find the keypoints and descriptors with SIFT
-
-    ''' Loop through all the reference pictures '''
-    ignore, goodmatches = loopThroughReference(img)
-
-    drawCircleAndMatches(ignore, good_matches)
-    if flag:
-        cv2.putText(img3,'Gazing at none of the object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
-    else:
-        cv2.putText(img3,'Gazing at the '+str(object_number)+' object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
-
-    cv2.imshow("hi", img3)
-    cv2.waitKey(10)
-
-def loopThroughReference(img):    
-    global img1, img2, imgt, poly_arr, poly_template, first, s, pos, flag, first_run_flag
     s=np.zeros((4,4))
     #print s.dtype
     pos = Position(0,0,0,0)
     flag = True
 
     first_run_flag = True
+    poly_arrays = []
     for i, img1 in enumerate(img):
         if first_run_flag == False:
             img2 = img3
-        poly_arr, poly_template = [], []
+        poly_arr, poly_template= [], []
         imgt = img2.copy()
         first = 0
-        ''' Check the frame for all instances that have the necessary matches for reference picture '''
+        cmatch = 0
         while True:
+            cmatch +=1
             good_matches= featureMatch(currentFrame)
             matchesMask, ignore, dst, break_flag = drawBorders(good_matches)
-            if break_flag:
+            if break_flag or cmatch>20:
                 # print "break"
                 break
             x, y = getXY(img2, framecount, videoData, idx, tail, fps, ignore)
             placeText(ignore, i, dst, x, y)
             first += 1
-    return ignore, goodmatches
+        poly_arrays.append(poly_arr)
+    x, y = drawCircleAndMatches(ignore, good_matches)
+    # print x, y, framecount
+    # print flag
+    if not flag:
+        order = FrameBFS.determineOrder(poly_arrays[object_number - 1])
+        poly_number = 10
+        for i in range(len(order)):
+            if order[i] in polygon_looked:
+                poly_number = i + 1
+                break
+    if flag:
+        cv2.putText(img3,'Gazing at none of the objects',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
+    else:
+        cv2.putText(img3,'Gazing at the '+str(poly_number)+' of the '+str(object_number)+' object',(250,30), font, 1,(255,255,255),2,cv2.LINE_AA)
+
+    cv2.imshow("hi", img3)
+    cv2.waitKey(10)
 
 def featureMatch(currentFrame):
     global kp1, kp2
@@ -84,7 +91,6 @@ def featureMatch(currentFrame):
     #     print 'this is des1: '+ str(des1)
     #     print 'this is des2: '+str(des2)
     matches = flann.knnMatch(des1, des2, k=2)
-
     good = []
     for m,n in matches:
         if m.distance < 0.7*n.distance:
@@ -93,9 +99,10 @@ def featureMatch(currentFrame):
     return good
 
 def drawBorders(good):
-    global img2, imgt
+    global img2, imgt, poly_arr
     ignore = False
     break_flag = False
+
     if len(good)>MIN_MATCH_COUNT:
         src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
         dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
@@ -178,16 +185,17 @@ def drawCircleAndMatches(ignore, good):
     img3, pos = drMatches.drawMatches(img1,kp1,img2,kp2,good, pos)
     # img3, pos = drMatches.drawMatches(img1,kp1,img2,kp2,good, pos) ## line must not execute
     first_run_flag = False
+    return x, y
 
 def placeText(ignore, i, dst, x, y):
-    global s, flag, img3, object_number
+    global s, flag, img3, object_number, polygon_looked
     if not ignore:
         s[i][0]=dst[0][0][0];
         s[i][1]=dst[3][0][0];
         s[i][2]=dst[0][0][1];
         s[i][3]=dst[2][0][1];
         if x>s[i][0] and x<s[i][1] and y>s[i][2] and y<s[i][3]:
-            # print "Hi"
+            polygon_looked = dst
             object_number = i + 1
             flag = False
 

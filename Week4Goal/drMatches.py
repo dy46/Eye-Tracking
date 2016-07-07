@@ -1,7 +1,6 @@
 import numpy as np
 import cv2
 from PIL import Image
-import sys
 
 class Position:
     color = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 255)]

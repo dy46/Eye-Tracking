@@ -115,6 +115,8 @@ def drawCircle(frame, frameCount, videoData, Idx, Tail,fps, ignore):
 	# print str(frameCount)+'           '+str(lowt)+'             ' +str(tpoint)+ '            ' +str(hight)
 	if x == None or y == None:
 		return frame, x, y, Idx, Tail, True
-
-	cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 20)
+	if math.isnan(float(x)) or math.isnan(float(y)):
+		return frame, x, y, Idx, Tail, ignore
+	else:
+		cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 20)
 	return frame, x, y, Idx, Tail, ignore
