@@ -8,9 +8,11 @@ from drMatches import Position, getXY
 import time
 import polygons_overlapping
 import FrameBFS
+import sys
+import templatefind
 
 '''Creating instance variables'''
-MIN_MATCH_COUNT = 30
+MIN_MATCH_COUNT = 20
 font = cv2.FONT_HERSHEY_SIMPLEX
 s, pos = None, None
 img1, img2, img3, imgt = None, None, None, None
@@ -23,10 +25,37 @@ poly_template = []
 object_number = None
 first = 0
 cmatch = 0
-polygon_looked = []
+template_flag = False
+
+
+def checkRect(array):
+    x1 = array[0][0]
+    y1 = array[0][1]
+    x2 = array[1][0]
+    y2 = array[1][1]
+    x3 = array[2][0]
+    y3 = array[2][1]
+    x4 = array[3][0]
+    y4 = array[3][1]
+
+    cx=(x1+x2+x3+x4)/4
+    cy=(y1+y2+y3+y4)/4
+
+    dd1=math.sqrt(abs(cx-x1))+math.sqrt(abs(cy-y1))
+    dd2=math.sqrt(abs(cx-x2))+math.sqrt(abs(cy-y2))
+    dd3=math.sqrt(abs(cx-x3))+math.sqrt(abs(cy-y3))
+    dd4=math.sqrt(abs(cx-x4))+math.sqrt(abs(cy-y4))
+    a = abs(dd1-dd2)/((dd1+dd2)/2)
+    b = abs(dd1-dd3)/((dd1+dd3)/2)
+    c = abs(dd1-dd4)/((dd1+dd4)/2)
+
+    if a > 0.2 or b>0.2 or c>0.2:
+        return False
+    else:
+        return True
 
 def startProcess(img, currentFrame):
-    global img1, img2, img3, imgt, s, pos, first_run_flag, poly_arr, poly_template, first, flag, polygon_looked
+    global img1, img2, img3, img4, imgt, s, pos, first_run_flag, poly_arr, poly_template, first, flag, template_flag, polygon_looked
     global idx, tail, framecount, cmatch
 
     # Initiate SIFT detector
@@ -45,10 +74,13 @@ def startProcess(img, currentFrame):
         imgt = img2.copy()
         first = 0
         cmatch = 0
+        template_flag = False
+        # print 'New image'
+        # print poly_template
         while True:
             cmatch +=1
             good_matches= featureMatch(currentFrame)
-            matchesMask, ignore, dst, break_flag = drawBorders(good_matches)
+            matchesMask, ignore, dst, break_flag = drawBorders(good_matches, currentFrame)
             if break_flag or cmatch>20:
                 # print "break"
                 break
@@ -95,11 +127,12 @@ def featureMatch(currentFrame):
     for m,n in matches:
         if m.distance < 0.7*n.distance:
             good.append(m)
-
+    # if currentFrame == 14:
+    #     print good
     return good
 
-def drawBorders(good):
-    global img2, imgt, poly_arr
+def drawBorders(good, currentFrame):
+    global img2, imgt, template_flag, poly_template, poly_arr
     ignore = False
     break_flag = False
 
@@ -109,7 +142,8 @@ def drawBorders(good):
 
         # for x in dst_pts:
         #     cv2.circle(imgs,(int(x[0][0]),int(x[0][1])),2,(255,0,0),2)
-
+        # if currentFrame == 14:
+        #     print "I have more good than min match count"
         M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
         if mask == None:
             break_flag = True
@@ -118,8 +152,23 @@ def drawBorders(good):
 
         h,w = img1.shape
         pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
+        # print 'pts'
+        # print pts
+        # print 'dst'
         dst = cv2.perspectiveTransform(pts,M)
+        if currentFrame in [557, 558, 559]:
+            print dst
+            print 'This is dst '+str(dst.size)
+        # print dst
+        if len(dst) == 0:
+            print "SO i am working to break"
+            break_flag = True
+            return None, None, None, break_flag
 
+        if dst.size ==0:
+            print "Size is the best method"
+            break_flag = True
+            return None, None, None, break_flag
         poly_currentarr = []
         for i in range(len(dst)):
             sub_dst = dst[i]
@@ -129,51 +178,77 @@ def drawBorders(good):
             arr = [x1, y1]
             poly_currentarr.append(arr)
         poly_currentarr.append(poly_currentarr[0])
+        # print poly_currentarr
         # print poly_current
-        if first == 0:
-            xb = poly_currentarr[0][0]
-            yb = poly_currentarr[0][1]
-            for i in range(len(poly_currentarr)):
-                arr = [poly_currentarr[i][0]-xb, poly_currentarr[i][1]-yb]
-                poly_template.append(arr)
-
+        # print 'The current frame is a rectangle: '+str(checkRect(poly_currentarr))
+        current_rec = checkRect(poly_currentarr)
+        # print template_flag
+        if not template_flag:
+            poly_template = templatefind.t_Start(img1, img2)
+            template_flag = True
+        ######## Checking to see if the current mask is a rectangle
         poly_current = np.asarray(poly_currentarr)
+        # if currentFrame == 40:
+        #     print 'Is template a rectangle: '
+        #     print poly_template
         if len(poly_arr)>0:
+            # if currentFrame==40:
+            #     print "I am close"
             for p in poly_arr:
-                if polygons_overlapping.pair_overlapping(p, poly_current) ==2:
-                    # print 2
-                    # print poly_template[0]
+                if polygons_overlapping.pair_overlapping(p, poly_current) ==2 or not current_rec:
                     xnot=dst[0][0][0]
                     ynot = dst[0][0][1]
                     t2_a = []
                     for i in range(len(poly_template)):
                         # print "Im here"
                         t2_b = []
-                        t_a =np.array([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
+                        t_a =np.int32([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
                         t2_b.append(t_a)
                         t2_a.append(t2_b)
-                    t3_a = np.array(t2_a)
+                    t3_a = np.int32(t2_a)
                     dst = t3_a
-
+        if len(poly_arr)==0 and not current_rec:
+            xnot=dst[0][0][0]
+            ynot = dst[0][0][1]
+            t2_a = []
+            for i in range(len(poly_template)):
+                t2_b = []
+                t_a =np.int32([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
+                t2_b.append(t_a)
+                t2_a.append(t2_b)
+            t3_a = np.int32(t2_a)
+            dst = t3_a
         poly_arr.append(poly_current)
-        # print poly_template
-        img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
-        imgt = cv2.fillPoly(imgt,[np.int32(dst)],(0,0,0))
-        index=[]
-        # img2 = cv2.polylines(img2,[np.int32(dst)],True,pos.getColor(),3, cv2.LINE_AA)
-        # cv2.circle(img2, (int(float(PoRBX[idx])),int(float(PoRBY[idx]))), 10, (255, 0, 0), 20)
+
+        if currentFrame in [557, 558, 559]:
+            if currentFrame == 558:
+                print 'FUCK i suck'
+            print 'dst'
+            print dst
+            print 'int32'
+            print [np.int32(dst)]
+            # cv2.imshow('img2', img2)
+            # cv2.waitKey(0)
+            # cv2.imshow('imgt', imgt)
+            # cv2.waitKey(0)
+        try: 
+            img2 = cv2.polylines(img2,[np.int32(dst)],True,255,3, cv2.LINE_AA)
+            imgt = cv2.fillPoly(imgt,[np.int32(dst)],(0,0,0))
+        except:
+            print 'EXCEPT BREAK'
+            break_flag = True
+            return None, None, None, break_flag
     else:
         # print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
         matchesMask = None
         ignore = True
         dst = None
         break_flag = True
-
-    # cv2.imshow('img',imgt)
-    # cv2.waitKey(10)
+    # if currentFrame == 40:
+    #     cv2.imshow('img',imgt)
+    #     cv2.waitKey(0)
     # cv2.imshow('img2', img2)
-    # cv2.waitKey(10)
-
+    # cv2.waitKey(5)
     return matchesMask, ignore, dst, break_flag
 
 def drawCircleAndMatches(ignore, good):
