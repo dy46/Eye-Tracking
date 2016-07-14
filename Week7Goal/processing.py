@@ -38,7 +38,7 @@ def singleProcess(processCount, fileLength, videoFile, fps, img, data):
     for i in range(bunches[0][0], bunches[0][1] - 1):
         results.append(frameQueue[i])
 
-    return results, False
+    return results, False, None, None
 
 def multiProcess(processCount, fileLength, videoFile, fps, img, data):
     qList = []
