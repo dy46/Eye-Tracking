@@ -107,14 +107,14 @@ def compareImages(ref_image_array, current_frame):
     return ignore, good_matches
 
 def featureMatch(currentFrame):
-    global kp1, kp2, resized_processed_image, resized_blacked_out_image
+    global kp1, kp2, resized_ref_image, resized_processed_image, resized_blacked_out_image
     sift = cv2.xfeatures2d.SIFT_create()
 
+    resized_ref_image = cv2.resize(ref_image,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_AREA)
     resized_processed_image = cv2.resize(processed_image,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_AREA)
     resized_blacked_out_image = cv2.resize(blacked_out_image,None,fx=0.5, fy=0.5, interpolation = cv2.INTER_AREA)
 
-    kp1, des1 = sift.detectAndCompute(ref_image,None)
-    # print blacked_out_image
+    kp1, des1 = sift.detectAndCompute(resized_ref_image,None)
     kp2, des2 = sift.detectAndCompute(resized_blacked_out_image,None)
 
     FLANN_INDEX_KDTREE = 0
@@ -122,16 +122,12 @@ def featureMatch(currentFrame):
     search_params = dict(checks = 50)
 
     flann = cv2.FlannBasedMatcher(index_params, search_params)
-    # if currentFrame == 35:
-    #     print 'this is des1: '+ str(des1)
-    #     print 'this is des2: '+str(des2)
     matches = flann.knnMatch(des1, des2, k=2)
+
     good = []
     for m,n in matches:
         if m.distance < 0.7*n.distance:
             good.append(m)
-    # if currentFrame == 14:
-    #     print good
     return good
 
 def drawBorders(good, currentFrame):
@@ -143,67 +139,37 @@ def drawBorders(good, currentFrame):
         src_pts = np.float32([ kp1[m.queryIdx].pt for m in good ]).reshape(-1,1,2)
         dst_pts = np.float32([ kp2[m.trainIdx].pt for m in good ]).reshape(-1,1,2)
 
-        # for x in dst_pts:
-        #     cv2.circle(imgs,(int(x[0][0]),int(x[0][1])),2,(255,0,0),2)
-        # if currentFrame == 14:
-        #     print "I have more good than min match count"
-        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC,5.0)
+        M, mask = cv2.findHomography(src_pts, dst_pts, cv2.RANSAC, 5.0)
         if mask == None:
-            break_flag = True
-            return None, None, None, break_flag
+            return None, None, None, True
         matchesMask = mask.ravel().tolist()
 
-        h,w = ref_image.shape
+        h,w = resized_ref_image.shape
         pts = np.float32([ [0,0],[0,h-1],[w-1,h-1],[w-1,0] ]).reshape(-1,1,2)
-        # print 'pts'
-        # print pts
-        # print 'dst'
-        dst = cv2.perspectiveTransform(pts,M)
-        if currentFrame in [557, 558, 559]:
-            print dst
-            print 'This is dst '+str(dst.size)
-        # print dst
-        if len(dst) == 0:
-            print "SO i am working to break"
-            break_flag = True
-            return None, None, None, break_flag
 
-        if dst.size ==0:
-            print "Size is the best method"
-            break_flag = True
-            return None, None, None, break_flag
+        dst = cv2.perspectiveTransform(pts,M)
+        if len(dst) == 0 or dst.size == 0:
+            return None, None, None, True
+
         poly_currentarr = []
         for i in range(len(dst)):
-            sub_dst = dst[i]
-            sub2_dst = sub_dst[0]
-            x1 = sub2_dst[0]
-            y1 = sub2_dst[1]
-            arr = [x1, y1]
-            poly_currentarr.append(arr)
-        poly_currentarr.append(poly_currentarr[0])
-        # print poly_currentarr
-        # print poly_current
-        # print 'The current frame is a rectangle: '+str(checkRect(poly_currentarr))
+            point_array = [dst[i][0][0], dst[i][0][1]]
+            poly_currentarr.append(point_array)
+        # poly_currentarr.append(poly_currentarr[0])
+        
         current_rec = checkRect(poly_currentarr)
-        # print template_flag
         if not template_flag:
-            poly_template = templatefind.t_Start(ref_image, resized_processed_image)
+            poly_template = templatefind.t_Start(resized_ref_image, resized_processed_image)
             template_flag = True
         ######## Checking to see if the current mask is a rectangle
         poly_current = np.asarray(poly_currentarr)
-        # if currentFrame == 40:
-        #     print 'Is template a rectangle: '
-        #     print poly_template
         if len(poly_arr)>0:
-            # if currentFrame==40:
-            #     print "I am close"
             for p in poly_arr:
                 if polygons_overlapping.pair_overlapping(p, poly_current) ==2 or not current_rec:
                     xnot=dst[0][0][0]
                     ynot = dst[0][0][1]
                     t2_a = []
                     for i in range(len(poly_template)):
-                        # print "Im here"
                         t2_b = []
                         t_a =np.int32([poly_template[i][0]+xnot, poly_template[i][1]+ynot])
                         t2_b.append(t_a)
@@ -226,17 +192,6 @@ def drawBorders(good, currentFrame):
             formatted_array.append(p[0])
         poly_arr.append(formatted_array)
 
-        if currentFrame in [557, 558, 559]:
-            if currentFrame == 558:
-                print 'FUCK i suck'
-            print 'dst'
-            print dst
-            print 'int32'
-            print [np.int32(dst)]
-            # cv2.imshow('processed_image', processed_image)
-            # cv2.waitKey(0)
-            # cv2.imshow('blacked_out_image', blacked_out_image)
-            # cv2.waitKey(0)
         expanded_dst = []
         for p in dst:
             point = []
@@ -249,17 +204,10 @@ def drawBorders(good, currentFrame):
             blacked_out_image = cv2.fillPoly(blacked_out_image,[np.int32(expanded_dst)],(0,0,0))
         except:
             print 'EXCEPT BREAK'
-            break_flag = True
-            return None, None, None, break_flag
+            return None, None, None, True
     else:
         # print "Not enough matches are found - %d/%d" % (len(good),MIN_MATCH_COUNT)
-        matchesMask = None
-        ignore = True
-        dst = None
-        break_flag = True
-    # if currentFrame == 40:
-    #     cv2.imshow('img',blacked_out_image)
-    #     cv2.waitKey(0)
+        return None, True, None, True
     # cv2.imshow('processed_image', processed_image)
     # cv2.waitKey(5)
     return matchesMask, ignore, dst, break_flag
