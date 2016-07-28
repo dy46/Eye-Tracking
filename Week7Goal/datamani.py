@@ -118,5 +118,5 @@ def drawCircle(frame, frameCount, videoData, Idx, Tail,fps, ignore):
 	if math.isnan(float(x)) or math.isnan(float(y)):
 		return frame, x, y, Idx, Tail, ignore
 	else:
-		cv2.circle(frame, (int(x), int(y)), 10, (255, 0, 0), 20)
+		cv2.circle(frame, (int(x), int(y)), 5, (255, 0, 0), 20)
 	return frame, x, y, Idx, Tail, ignore

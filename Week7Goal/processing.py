@@ -10,20 +10,19 @@ from FrameProcessing import processImage
 import time
 
 def getFrame(queue, startFrame, endFrame, i, videoFile, frameCounts, indices, tails, fps, img, data):
-    cap = cv2.VideoCapture(videoFile)  # crashes here
-    # print("opened capture {}".format(mp.current_process()))
-    # print type(queue)
+    cap = cv2.VideoCapture(videoFile)
     for frame in range(startFrame, endFrame):
-        cap.set(cv2.CAP_PROP_POS_FRAMES, frame)  # opencv3
+        cap.set(cv2.CAP_PROP_POS_FRAMES, frame)
         print 'Current frame: '+ str(frame)         
-        frameNo = int(cap.get(cv2.CAP_PROP_POS_FRAMES))  # opencv3
+        frameNo = int(cap.get(cv2.CAP_PROP_POS_FRAMES))
         ret, f = cap.read()
         f = processImage(f, frame, i, fps, frameCounts, indices, tails, img, data)
         if ret:
-            try:
-                queue.put([frameNo, f])
-            except:
-                queue.append([frameNo, f])
+            # try:
+            #     queue.put([frameNo, f])
+            # except:
+            #     queue.append([frameNo, f])
+            queue.append([frameNo, f])
     cap.release()
 
 def singleProcess(processCount, fileLength, videoFile, fps, img, data):
@@ -44,16 +43,9 @@ def multiProcess(processCount, fileLength, videoFile, fps, img, data):
     qList = []
     for i in range(processCount):
     	qList.append(mp.JoinableQueue())
-    # inQ1 = mp.JoinableQueue()  # not sure if this is right queue type, but I also tried mp.Queue()
-    # inQ2 = mp.JoinableQueue()
-    # inQ3 = mp.JoinableQueue()
-    # qList = [inQ1, inQ2, inQ3]
-    # print fileLen
-    # set up bunches
 
     bunches, frameCounts, indices, tails = createArrays(processCount, fileLength, fps)
 
-    # print bunches
     getFrames = []
     for i in range(processCount):
         getFrames.append(mp.Process(target=getFrame, args=(qList[i], bunches[i][0], bunches[i][1], i, videoFile, frameCounts, indices, tails, fps, img, data)))
