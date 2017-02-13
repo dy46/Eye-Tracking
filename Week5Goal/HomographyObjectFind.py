@@ -22,9 +22,11 @@ if __name__ == '__main__':
     i = 0 ## Reads in comparison images
     file="Three_Objects_No_Point_Short.mp4"
     multi_flag=False
-    img,file,multi_flag=gui.start()
-    print img, file, multi_flag
-    img = [cv2.imread(img[0], 0), cv2.imread(img[1],0)]
+    refimg,file,multi_flag=gui.start()
+    print refimg, file, multi_flag
+    img=[]
+    for i in refimg:
+        img.append(cv2.imread(i, 0))
     videoData = datamani.createVideoData(open('Three_Objects_Raw_Data.txt', 'r')) ## Reads in data file
 
     capture_temp = cv2.VideoCapture(file)

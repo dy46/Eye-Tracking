@@ -238,8 +238,8 @@ def drawBorders(good, currentFrame):
     # if currentFrame == 40:
     #     cv2.imshow('img',imgt)
     #     cv2.waitKey(0)
-    # cv2.imshow('img2', img2)
-    # cv2.waitKey(5)
+    cv2.imshow('imgt', imgt)
+    cv2.waitKey()
     return matchesMask, ignore, dst, break_flag
 
 def drawCircleAndMatches(ignore, good):

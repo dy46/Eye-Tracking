@@ -3,6 +3,7 @@ from Tkinter import *
 from PIL import ImageTk, Image
 import os
 import cv2
+import crop
 
 button_opt = {'fill': Tkconstants.BOTH, 'padx': 10, 'pady': 10, 'side': 'left'}
 selected = 0
@@ -14,6 +15,7 @@ ready1=False
 ready2=False
 s=[]
 multiFlag=None
+imgname=[]
 
 def asksaveasfilename(self):
 
@@ -60,8 +62,8 @@ def askopenimage():
     refimg.append(filename)
     img2 = ImageTk.PhotoImage(resized(Image.open(filename)))
 
-    panel[selected].configure(image = img2)
-    panel[selected].image = img2
+    panel[selected*2].configure(image = img2)
+    panel[selected*2].image = img2
 
     selected+=1
     if selected>=cnt:
@@ -75,7 +77,7 @@ def resized(originalImg):
 
 
 def askopenvideo():
-    global var, bottomframe, cnt, ready2, filename
+    global var, bottomframe, cnt, ready2, filename, path
     video_opt = options2 = {}
     options2['defaultextension'] = '.mp4'
     options2['filetypes'] = [('all files', '.*'), ('text files', '.mp4')]
@@ -101,15 +103,30 @@ def runandquit():
         return
     root.quit()
 
+def grayout():
+    global panel, imgname
+    #print 'ImHere'
+    temp=StringVar()
+    for i in range(0,len(panel)):
+        if i % 2==1:
+            #print i
+            print imgname[i/2].get()
+            #panel[i]=Tkinter.Entry(bottomframe,textvariable=imgname[0])
+            panel[i].configure(state=DISABLED)
+
 
 def addobject():
-    global bottomframe, cnt, frame, panel
+    global bottomframe, cnt, frame, panel, imgname
+    imgname.append(StringVar());
     if cnt>=4:
         messagealert("Hey! That's too many objects")
     cnt+=1
     initimg1=ImageTk.PhotoImage(resized(Image.open("logo.png")))
+    #tr=Tkinter.Entry(bottomframe, bd=5)
+    #tr.pack(side=LEFT)
     panel.append(Tkinter.Label(bottomframe,image=initimg1))
-    panel[-1].img=initimg1
+    panel.append(Tkinter.Entry(bottomframe,textvariable=imgname[-1]))
+    panel[-2].img=initimg1
     if cnt==1:
         conf="left"
     if cnt==2:
@@ -118,7 +135,8 @@ def addobject():
         conf="bottom"
     if cnt==4:
         conf="right"
-    panel[-1].grid(row=(cnt-1)/2,column=(cnt-1)%2)
+    panel[-1].grid(row=(cnt-1)/2*2,column=(cnt-1)%2)
+    panel[-2].grid(row=(cnt-1)/2*2+1,column=(cnt-1)%2)
     ready1=False
     updatestatus();
 
@@ -133,13 +151,49 @@ def sel():
         multiFlag=False
     else:
         multiFlag=True
-    rbutton.config(text = selection)
+    #rbutton.config(text = selection)
+
+def addcrop():
+    global bottomframe, cnt, selected, refimg, panel, ready1, filename, path
+
+    #if selected>=cnt:
+    #    messagealert("Hey! You need to add an object first!")
+    #    return
+    if not ready2:
+        messagealert("Hey! You need to select the video first")
+    filename1=filename.split("/")[-1]
+    print filename1
+
+    v=cv2.VideoCapture(filename1)
+    ret,imgForCrop=v.read()
+    imgname=crop.crop(imgForCrop)
+    for f in imgname:
+        if (selected>=cnt):
+            addobject()
+        print f
+        refimg.append(f)
+        img2 = ImageTk.PhotoImage(resized(Image.open(f)))
+        print selected
+        panel[selected].configure(image = img2)
+        panel[selected].image = img2
+
+        selected+=1
+        if selected>=cnt:
+            ready1=True
+
+        updatestatus()
 
 def start():
-    global frame, bottomframe, panel, panel2, var, cnt, status, flag, root, choice, processingdict, rbutton, multiFlag
+    global imgname, frame, bottomframe, panel, panel2, var, cnt, status, flag, root, choice, processingdict, rbutton, multiFlag
 
     root = Tkinter.Tk()
     root.title("Eye-Tracking and Food Choices")
+
+    #Add a background image
+    background_image= ImageTk.PhotoImage(Image.open("bg.jpg"))
+    background_label = Tkinter.Label(root, image=background_image)
+    background_label.place(x=0, y=0, relwidth=1, relheight=1)
+
     """
     w = 400 # width for the Tk root
     h = 600 # height for the Tk root
@@ -170,6 +224,7 @@ def start():
     Tkinter.Button(frame, text='Select Video', command=askopenvideo).pack(**button_opt)
     Tkinter.Button(frame, text='  Run  ', command=runandquit).pack(**button_opt)
     Tkinter.Button(frame, text='Add Object', command=addobject).pack(**button_opt)
+    Tkinter.Button(frame, text='Crop Image', command=addcrop).pack(**button_opt)
     
     processingdict={"Single Processing":1,"Multi Processing":2}
     #Add a status for single or multi processing
@@ -198,9 +253,14 @@ def start():
     cnt=0 
     addobject()
 
+    objectname = Tkinter.Button(middle, text='Finish', command=grayout)
+    objectname.pack(side=LEFT)
     root.mainloop()
+    result=[]
+    for i in range(0,len(imgname)):
+        result.append(imgname[i].get())
     root.destroy()
-    return refimg, filename, multiFlag
+    return refimg, filename, multiFlag, result
 
 if __name__=="__main__":
     list1=start()
